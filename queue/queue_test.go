@@ -88,7 +88,7 @@ func TestMain(m *testing.M) {
 
 func testEnqueueHelper[T comparable](t *testing.T, testcases *[]Testcase[T]) {
 	for _, testcase := range *testcases {
-		q := Queueinit[T]()
+		q := QueueInit[T]()
 
 		for _, element := range testcase.elements {
 			q.Enqueue(element)
@@ -113,7 +113,7 @@ func TestEnqueue(t *testing.T) {
 
 func testPeekHelper[T comparable](t *testing.T, testcases *[]Testcase[T]) {
 	for _, testcase := range *testcases {
-		q := Queueinit[T]()
+		q := QueueInit[T]()
 
 		for _, element := range testcase.elements {
 			q.Enqueue(element)
@@ -148,7 +148,7 @@ func TestPeek(t *testing.T) {
 
 func testDequeueHelper[T comparable](t *testing.T, testcases *[]Testcase[T]) {
 	for _, testcase := range *testcases {
-		q := Queueinit[T]()
+		q := QueueInit[T]()
 
 		for _, element := range testcase.elements {
 			q.Enqueue(element)

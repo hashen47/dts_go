@@ -3,26 +3,32 @@ package stack
 import "fmt"
 
 type Stack[T comparable] struct {
-	I   int
-	Buf []T
+	i   int
+	buf *[]T
 }
+
+var StackEmptyErr error = fmt.Errorf("Stack is Empty")
 
 func StackInit[T comparable]() *Stack[T] {
 	buf := make([]T, 0)
 
 	return &Stack[T]{
-		I:   -1,
-		Buf: buf,
+		i:   -1,
+		buf: &buf,
 	}
 }
 
+func (s Stack[T]) String() string {
+    return fmt.Sprintf("Stack<i: %d, buf: %v>\n", s.i, *s.buf)
+}
+
 func (s *Stack[T]) Push(el T) {
-	s.I++
-	s.Buf = append(s.Buf, el)
+	s.i++
+	*s.buf = append(*s.buf, el)
 }
 
 func (s *Stack[T]) IsEmpty() bool {
-	if s.I < 0 {
+	if s.i < 0 {
 		return true
 	}
 	return false
@@ -31,11 +37,11 @@ func (s *Stack[T]) IsEmpty() bool {
 func (s *Stack[T]) Pop() (T, error) {
 	if s.IsEmpty() {
 		var result T
-		return result, fmt.Errorf("stack is empty")
+		return result, StackEmptyErr 
 	}
 
-	el := s.I
-	s.I--
+	el := s.i
+	s.i--
 
-	return s.Buf[el], nil
+	return (*s.buf)[el], nil
 }
