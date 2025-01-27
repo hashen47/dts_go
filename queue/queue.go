@@ -11,7 +11,7 @@ type Queue[T comparable] struct {
 
 var QEmptyErr error = fmt.Errorf("Queue is empty")
 
-func Queueinit[T comparable]() *Queue[T] {
+func QueueInit[T comparable]() *Queue[T] {
 	buf := make([]T, 0)
 
 	return &Queue[T]{

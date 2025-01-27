@@ -68,13 +68,13 @@ func TestMain(m *testing.M) {
 	m.Run()
 }
 
-func isSlicesEqual[T comparable](slice1 []T, slice2 []T) bool {
-	if len(slice1) != len(slice2) {
+func isSlicesEqual[T comparable](slice1 *[]T, slice2 *[]T) bool {
+	if len(*slice1) != len(*slice2) {
 		return false
 	}
 
-	for i := 0; i < len(slice1); i++ {
-		if slice1[i] != slice2[i] {
+	for i := 0; i < len(*slice1); i++ {
+		if (*slice1)[i] != (*slice2)[i] {
 			return false
 		}
 	}
@@ -82,121 +82,88 @@ func isSlicesEqual[T comparable](slice1 []T, slice2 []T) bool {
 	return true
 }
 
-func testPushHelper[T comparable](t *testing.T, testcase *TestCase[T], s *Stack[T]) {
-	for _, el := range testcase.elements {
-		s.Push(el)
-	}
+func testPushHelper[T comparable](t *testing.T, testcases *[]TestCase[T]) {
+    for _, testcase := range *testcases {
+        s := StackInit[T]()
 
-	if !isSlicesEqual(testcase.elements, s.Buf) {
-		t.Fatalf("expect: %v, real: %v\n", testcase.elements, s.Buf)
-	}
+        for _, el := range testcase.elements {
+            s.Push(el)
+        }
+
+        if !isSlicesEqual(&testcase.elements, s.buf) {
+            t.Fatalf("expect: %v, real: %v, stack: %v\n", testcase.elements, *s.buf, s)
+        }
+    }
 }
 
 func TestPush(t *testing.T) {
-	for _, testcase := range intTestcases {
-		s := StackInit[int]()
-		testPushHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range floatTestcases {
-		s := StackInit[float64]()
-		testPushHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range strTestcases {
-		s := StackInit[string]()
-		testPushHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range byteTestcases {
-		s := StackInit[byte]()
-		testPushHelper(t, &testcase, s)
-	}
+    testPushHelper[int](t, &intTestcases)
+    testPushHelper[float64](t, &floatTestcases)
+    testPushHelper[string](t, &strTestcases)
+    testPushHelper[byte](t, &byteTestcases)
 }
 
-func testIsEmptyHelper[T comparable](t *testing.T, testcase *TestCase[T], s *Stack[T]) {
-	for _, el := range testcase.elements {
-		s.Push(el)
-	}
+func testIsEmptyHelper[T comparable](t *testing.T, testcases *[]TestCase[T]) {
+    for _, testcase := range *testcases {
+        s := StackInit[T]()
 
-	if (s.IsEmpty() && len(testcase.elements) != 0) ||
-		(!s.IsEmpty() && len(testcase.elements) == 0) {
-		t.Fatalf("expect: %v, real: %v\n, stack: %v", testcase.isEmpty, s.IsEmpty(), s)
-	}
+        for _, el := range testcase.elements {
+            s.Push(el)
+        }
+
+        if (s.IsEmpty() && len(testcase.elements) != 0) ||
+            (!s.IsEmpty() && len(testcase.elements) == 0) {
+            t.Fatalf("expect: %v, real: %v\n, stack: %v", testcase.isEmpty, s.IsEmpty(), s)
+        }
+    }
 }
 
 func TestIsEmpty(t *testing.T) {
-	for _, testcase := range intTestcases {
-		s := StackInit[int]()
-		testIsEmptyHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range floatTestcases {
-		s := StackInit[float64]()
-		testIsEmptyHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range strTestcases {
-		s := StackInit[string]()
-		testIsEmptyHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range byteTestcases {
-		s := StackInit[byte]()
-		testIsEmptyHelper(t, &testcase, s)
-	}
+    testIsEmptyHelper[int](t, &intTestcases)
+    testIsEmptyHelper[float64](t, &floatTestcases)
+    testIsEmptyHelper[string](t, &strTestcases)
+    testIsEmptyHelper[byte](t, &byteTestcases)
 }
 
-func testPopHelper[T comparable](t *testing.T, testcase *TestCase[T], s *Stack[T]) {
-	for _, el := range (*testcase).elements {
-		s.Push(el)
-	}
+func testPopHelper[T comparable](t *testing.T, testcases *[]TestCase[T]) {
+    for _, testcase := range *testcases {
+        s := StackInit[T]()
 
-	if len(s.Buf) == 0 {
-		_, err := s.Pop()
+        for _, el := range testcase.elements {
+            s.Push(el)
+        }
 
-		if err == nil {
-			t.Fatalf("expect: <error>, real: %v, stack: %v\n", err, s)
-		}
-	} else {
-		for {
-			if s.I == -1 {
-				break
-			}
+        if len(*s.buf) == 0 {
+            _, err := s.Pop()
 
-			val, err := s.Pop()
+            if err == nil {
+                t.Fatalf("expect: <error>, real: %v, stack: %v\n", err, s)
+            }
+        } else {
+            for {
+                if s.i == -1 {
+                    break
+                }
 
-			if err != nil {
-				t.Fatalf("expect: nil, real: %v, stack: %v\n", err, s)
-			}
+                val, err := s.Pop()
 
-			expectVal := (*testcase).elements[s.I+1]
+                if err != nil {
+                    t.Fatalf("expect: nil, real: %v, stack: %v\n", err, s)
+                }
 
-			if expectVal != val {
-				t.Fatalf("expect: %v, real: %v, stack: %v\n", expectVal, val, s)
-			}
-		}
+                expectVal := testcase.elements[s.i + 1]
+
+                if expectVal != val {
+                    t.Fatalf("expect: %v, real: %v, stack: %v\n", expectVal, val, s)
+                }
+            }
+        }
 	}
 }
 
 func TestPop(t *testing.T) {
-	for _, testcase := range intTestcases {
-		s := StackInit[int]()
-		testPopHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range floatTestcases {
-		s := StackInit[float64]()
-		testPopHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range strTestcases {
-		s := StackInit[string]()
-		testPopHelper(t, &testcase, s)
-	}
-
-	for _, testcase := range byteTestcases {
-		s := StackInit[byte]()
-		testPopHelper(t, &testcase, s)
-	}
+    testPopHelper[int](t, &intTestcases)
+    testPopHelper[float64](t, &floatTestcases)
+    testPopHelper[string](t, &strTestcases)
+    testPopHelper[byte](t, &byteTestcases)
 }
